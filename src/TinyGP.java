@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.StringTokenizer;
 
 public class TinyGP {
@@ -65,9 +66,8 @@ public class TinyGP {
         } catch (FileNotFoundException e) {
             System.out.println("ERROR: Please provide a data file");
             System.exit(0);
-        } catch (Exception e) {
-            System.out.println("ERROR: Incorrect data format");
-            System.exit(0);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

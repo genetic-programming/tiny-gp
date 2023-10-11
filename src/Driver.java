@@ -18,7 +18,7 @@ public class Driver {
 
         dataFileName = "data/" + dataFileName;
         File dataFile = new File(dataFileName);
-        if (!dataFile.exists() || dataFile.isDirectory()) {
+        if (!dataFile.exists()) {
             DataGenerator dataGenerator = new DataGenerator();
             dataGenerator.generateData(dataFileName, -10, 0, 100);
         }

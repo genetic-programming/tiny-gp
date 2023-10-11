@@ -1,4 +1,9 @@
 public class DataFileHeader {
+    /**
+     * Data class that represents the header of the data file.
+     * It basically means the first line of the data file with 5 numbers.
+     */
+
     public int VARIABLES_NUMBER;
     public int RANDOM_NUMBER;
     public double MIN_RANDOM;

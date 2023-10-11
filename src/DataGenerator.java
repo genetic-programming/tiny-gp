@@ -12,12 +12,18 @@ public class DataGenerator {
     ) throws IOException {
         File Candidatefile = new File(fileName);
         BufferedWriter output = new BufferedWriter(new FileWriter(Candidatefile));
+
+        output.write("1 100 -10 10 " + quantity);
+        output.newLine();
+
         double argument = start;
         for (int i = 0; i < quantity; i++) {
             output.write(argument + " " + this.function(argument));
             output.newLine();
-            argument = start + ((end - start) / quantity);
+            argument += ((end - start) / quantity);
         }
+
+        output.close();
     }
 
     private double function(double x) {
