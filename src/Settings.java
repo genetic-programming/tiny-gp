@@ -16,7 +16,7 @@ public class Settings {
     public final int GENERATIONS = 100;
     public final int T_SIZE = 2;
     public final double P_MUT_PER_NODE = 0.05;
-    public final double CROSSOVER_PROB = 0.9;
+    public final double CROSSOVER_PROBABILITY = 0.9;
     public final double ACCEPTABLE_ERROR = -1e-5;
 
     public Settings(String fileName, long seed) {
