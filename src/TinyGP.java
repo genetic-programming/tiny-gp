@@ -5,16 +5,12 @@ import java.util.StringTokenizer;
 
 public class TinyGP {
     Settings settings;
+    DataFileHeader dataFileHeader;
     double[] fitness;
-    char[][] pop;
-    static double[] x;
-    static double minRandom;
-    static double maxRandom;
+    char[][] population;
+    static double[] xAxis;
     static char[] program;
     static int pc;
-    static int varNumber;
-    static int fitnessCases;
-    static int randomNumber;
     static double fBestPop = 0.0;
     static double fAvgPop = 0.0;
     static double avgLen;
@@ -25,7 +21,7 @@ public class TinyGP {
         this.settings = settings;
         fitness = new double[settings.POP_SIZE];
         buffer = new char[settings.MAX_LEN];
-        x = new double[settings.F_SET_START];
+        xAxis = new double[settings.F_SET_START];
 
         if (settings.seed >= 0)
             settings.RANDOM.setSeed(settings.seed);
@@ -33,45 +29,8 @@ public class TinyGP {
         setupFitness();
 
         for (int i = 0; i < settings.F_SET_START; i++)
-            x[i] = (maxRandom - minRandom) * settings.RANDOM.nextDouble() + minRandom;
-        pop = createRandomPop(settings.POP_SIZE, settings.DEPTH, fitness);
-    }
-
-    double run() { /* Interpreter */
-        char primitive = program[pc++];
-        if (primitive < settings.F_SET_START)
-            return (x[primitive]);
-        switch (primitive) {
-            case Settings.ADD:
-                return (run() + run());
-            case Settings.SUB:
-                return (run() - run());
-            case Settings.MUL:
-                return (run() * run());
-            case Settings.DIV: {
-                double num = run(), den = run();
-                if (Math.abs(den) <= 0.001)
-                    return (num);
-                else
-                    return (num / den);
-            }
-        }
-        return (0.0); // should never get here
-    }
-
-    int traverse(char[] buffer, int buffercount) {
-        if (buffer[buffercount] < settings.F_SET_START)
-            return (++buffercount);
-
-        switch (buffer[buffercount]) {
-            case Settings.ADD:
-            case Settings.SUB:
-            case Settings.MUL:
-            case Settings.DIV:
-                return (traverse(buffer, traverse(buffer, ++buffercount)));
-            default:
-                return (0);
-        }
+            xAxis[i] = (dataFileHeader.MAX_RANDOM - dataFileHeader.MIN_RANDOM) * settings.RANDOM.nextDouble() + dataFileHeader.MIN_RANDOM;
+        population = createRandomPopulation(settings.POP_SIZE, settings.DEPTH, fitness);
     }
 
     void setupFitness() {
@@ -82,20 +41,23 @@ public class TinyGP {
             BufferedReader input = new BufferedReader(new FileReader(settings.fileName));
             header = input.readLine();
             StringTokenizer tokens = new StringTokenizer(header);
-            varNumber = Integer.parseInt(tokens.nextToken().trim());
-            randomNumber = Integer.parseInt(tokens.nextToken().trim());
-            minRandom = Double.parseDouble(tokens.nextToken().trim());
-            maxRandom = Double.parseDouble(tokens.nextToken().trim());
-            fitnessCases = Integer.parseInt(tokens.nextToken().trim());
-            targets = new double[fitnessCases][varNumber + 1];
 
-            if (varNumber + randomNumber >= settings.F_SET_START)
+            dataFileHeader = new DataFileHeader(
+                    Integer.parseInt(tokens.nextToken().trim()),
+                    Integer.parseInt(tokens.nextToken().trim()),
+                    Double.parseDouble(tokens.nextToken().trim()),
+                    Double.parseDouble(tokens.nextToken().trim()),
+                    Integer.parseInt(tokens.nextToken().trim())
+            );
+            targets = new double[dataFileHeader.FITNESS_CASES][dataFileHeader.VAR_NUMBER + 1];
+
+            if (dataFileHeader.VAR_NUMBER + dataFileHeader.RANDOM_NUMBER >= settings.F_SET_START)
                 System.out.println("too many variables and constants");
 
-            for (i = 0; i < fitnessCases; i++) {
+            for (i = 0; i < dataFileHeader.FITNESS_CASES; i++) {
                 header = input.readLine();
                 tokens = new StringTokenizer(header);
-                for (j = 0; j <= varNumber; j++) {
+                for (j = 0; j <= dataFileHeader.VAR_NUMBER; j++) {
                     targets[i][j] = Double.parseDouble(tokens.nextToken().trim());
                 }
             }
@@ -109,19 +71,30 @@ public class TinyGP {
         }
     }
 
-    double fitnessFunction(char[] program) {
-        int i = 0, len;
-        double result, fit = 0.0;
+    char[][] createRandomPopulation(int n, int depth, double[] fitness) {
+        char[][] pop = new char[n][];
+        int i;
 
-        len = traverse(program, 0);
-        for (i = 0; i < fitnessCases; i++) {
-            if (varNumber >= 0) System.arraycopy(targets[i], 0, x, 0, varNumber);
-            TinyGP.program = program;
-            pc = 0;
-            result = run();
-            fit += Math.abs(result - targets[i][varNumber]);
+        for (i = 0; i < n; i++) {
+            pop[i] = createRandomIndividual(depth);
+            fitness[i] = fitnessFunction(pop[i]);
         }
-        return (-fit);
+        return (pop);
+    }
+
+    char[] createRandomIndividual(int depth) {
+        char[] ind;
+        int len;
+
+        len = grow(buffer, 0, settings.MAX_LEN, depth);
+
+        while (len < 0)
+            len = grow(buffer, 0, settings.MAX_LEN, depth);
+
+        ind = new char[len];
+
+        System.arraycopy(buffer, 0, ind, 0, len);
+        return (ind);
     }
 
     int grow(char[] buffer, int pos, int max, int depth) {
@@ -135,7 +108,7 @@ public class TinyGP {
             prim = 1;
 
         if (prim == 0 || depth == 0) {
-            prim = (char) settings.RANDOM.nextInt(varNumber + randomNumber);
+            prim = (char) settings.RANDOM.nextInt(dataFileHeader.VAR_NUMBER + dataFileHeader.RANDOM_NUMBER);
             buffer[pos] = prim;
             return (pos + 1);
         } else {
@@ -155,68 +128,37 @@ public class TinyGP {
         return (0); // should never get here
     }
 
-    int printIndiv(char[] buffer, int buffercounter) {
-        int a1 = 0, a2;
-        if (buffer[buffercounter] < settings.F_SET_START) {
-            if (buffer[buffercounter] < varNumber)
-                System.out.print("X" + (buffer[buffercounter] + 1) + " ");
-            else
-                System.out.print(x[buffer[buffercounter]]);
-            return (++buffercounter);
+    void evolve() {
+        int gen;
+        int indivs, offspring, parent1, parent2, parent;
+        double newfit;
+        char[] newind;
+        printParams();
+        stats(fitness, population, 0);
+        for (gen = 1; gen < settings.GENERATIONS; gen++) {
+            if (fBestPop > settings.ACCEPTABLE_ERROR) {
+                System.out.print("PROBLEM SOLVED\n");
+                System.exit(0);
+            }
+            for (indivs = 0; indivs < settings.POP_SIZE; indivs++) {
+                if (settings.RANDOM.nextDouble() < settings.CROSSOVER_PROB) {
+                    parent1 = tournament(fitness, settings.T_SIZE);
+                    parent2 = tournament(fitness, settings.T_SIZE);
+                    newind = crossover(population[parent1], population[parent2]);
+                } else {
+                    parent = tournament(fitness, settings.T_SIZE);
+                    newind = mutation(population[parent], settings.P_MUT_PER_NODE);
+                }
+                newfit = fitnessFunction(newind);
+                offspring = negativeTournament(fitness, settings.T_SIZE);
+                population[offspring] = newind;
+                fitness[offspring] = newfit;
+            }
+            stats(fitness, population, gen);
         }
-        switch (buffer[buffercounter]) {
-            case Settings.ADD:
-                System.out.print("(");
-                a1 = printIndiv(buffer, ++buffercounter);
-                System.out.print(" + ");
-                break;
-            case Settings.SUB:
-                System.out.print("(");
-                a1 = printIndiv(buffer, ++buffercounter);
-                System.out.print(" - ");
-                break;
-            case Settings.MUL:
-                System.out.print("(");
-                a1 = printIndiv(buffer, ++buffercounter);
-                System.out.print(" * ");
-                break;
-            case Settings.DIV:
-                System.out.print("(");
-                a1 = printIndiv(buffer, ++buffercounter);
-                System.out.print(" / ");
-                break;
-        }
-        a2 = printIndiv(buffer, a1);
-        System.out.print(")");
-        return (a2);
+        System.out.print("PROBLEM *NOT* SOLVED\n");
+        System.exit(1);
     }
-
-    char[] createRandomIndiv(int depth) {
-        char[] ind;
-        int len;
-
-        len = grow(buffer, 0, settings.MAX_LEN, depth);
-
-        while (len < 0)
-            len = grow(buffer, 0, settings.MAX_LEN, depth);
-
-        ind = new char[len];
-
-        System.arraycopy(buffer, 0, ind, 0, len);
-        return (ind);
-    }
-
-    char[][] createRandomPop(int n, int depth, double[] fitness) {
-        char[][] pop = new char[n][];
-        int i;
-
-        for (i = 0; i < n; i++) {
-            pop[i] = createRandomIndiv(depth);
-            fitness[i] = fitnessFunction(pop[i]);
-        }
-        return (pop);
-    }
-
 
     void stats(double[] fitness, char[][] pop, int gen) {
         int i, best = settings.RANDOM.nextInt(settings.POP_SIZE);
@@ -237,9 +179,77 @@ public class TinyGP {
         System.out.print("Generation=" + gen + " Avg Fitness=" + (-fAvgPop) +
                 " Best Fitness=" + (-fBestPop) + " Avg Size=" + avgLen +
                 "\nBest Individual: ");
-        printIndiv(pop[best], 0);
+        printIndividual(pop[best], 0);
         System.out.print("\n");
         System.out.flush();
+    }
+
+    int traverse(char[] buffer, int buffercount) {
+        if (buffer[buffercount] < settings.F_SET_START)
+            return (++buffercount);
+
+        switch (buffer[buffercount]) {
+            case Settings.ADD:
+            case Settings.SUB:
+            case Settings.MUL:
+            case Settings.DIV:
+                return (traverse(buffer, traverse(buffer, ++buffercount)));
+            default:
+                return (0);
+        }
+    }
+
+    int printIndividual(char[] buffer, int buffercounter) {
+        int a1 = 0, a2;
+        if (buffer[buffercounter] < settings.F_SET_START) {
+            if (buffer[buffercounter] < dataFileHeader.VAR_NUMBER)
+                System.out.print("X" + (buffer[buffercounter] + 1) + " ");
+            else
+                System.out.print(xAxis[buffer[buffercounter]]);
+            return (++buffercounter);
+        }
+        switch (buffer[buffercounter]) {
+            case Settings.ADD:
+                System.out.print("(");
+                a1 = printIndividual(buffer, ++buffercounter);
+                System.out.print(" + ");
+                break;
+            case Settings.SUB:
+                System.out.print("(");
+                a1 = printIndividual(buffer, ++buffercounter);
+                System.out.print(" - ");
+                break;
+            case Settings.MUL:
+                System.out.print("(");
+                a1 = printIndividual(buffer, ++buffercounter);
+                System.out.print(" * ");
+                break;
+            case Settings.DIV:
+                System.out.print("(");
+                a1 = printIndividual(buffer, ++buffercounter);
+                System.out.print(" / ");
+                break;
+        }
+        a2 = printIndividual(buffer, a1);
+        System.out.print(")");
+        return (a2);
+    }
+
+    void printParams() {
+        System.out.print(
+                "-- TINY GP (Java version) --" +
+                        "\nSEED=" + settings.seed +
+                        "\nMAX_LEN=" + settings.MAX_LEN +
+                        "\nPOP_SIZE=" + settings.POP_SIZE +
+                        "\nDEPTH=" + settings.DEPTH +
+                        "\nCROSSOVER_PROB=" + settings.CROSSOVER_PROB +
+                        "\nP_MUT_PER_NODE=" + settings.P_MUT_PER_NODE +
+                        "\nMIN_RANDOM=" + dataFileHeader.MIN_RANDOM +
+                        "\nMAX_RANDOM=" + dataFileHeader.MAX_RANDOM +
+                        "\nGENERATIONS=" + settings.GENERATIONS +
+                        "\nT_SIZE=" + settings.T_SIZE +
+                        "\n----------------------------------\n"
+        );
     }
 
     int tournament(double[] fitness, int tsize) {
@@ -254,20 +264,6 @@ public class TinyGP {
             }
         }
         return (best);
-    }
-
-    int negativeTournament(double[] fitness, int tsize) {
-        int worst = settings.RANDOM.nextInt(settings.POP_SIZE), i, competitor;
-        double fworst = 1e34;
-
-        for (i = 0; i < tsize; i++) {
-            competitor = settings.RANDOM.nextInt(settings.POP_SIZE);
-            if (fitness[competitor] < fworst) {
-                fworst = fitness[competitor];
-                worst = competitor;
-            }
-        }
-        return (worst);
     }
 
     char[] crossover(char[] parent1, char[] parent2) {
@@ -307,7 +303,7 @@ public class TinyGP {
             if (settings.RANDOM.nextDouble() < pmut) {
                 mutsite = i;
                 if (parentcopy[mutsite] < settings.F_SET_START)
-                    parentcopy[mutsite] = (char) settings.RANDOM.nextInt(varNumber + randomNumber);
+                    parentcopy[mutsite] = (char) settings.RANDOM.nextInt(dataFileHeader.VAR_NUMBER + dataFileHeader.RANDOM_NUMBER);
                 else
                     switch (parentcopy[mutsite]) {
                         case Settings.ADD:
@@ -323,52 +319,54 @@ public class TinyGP {
         return (parentcopy);
     }
 
-    void printParams() {
-        System.out.print(
-            "-- TINY GP (Java version) --" +
-            "\nSEED=" + settings.seed +
-            "\nMAX_LEN=" + settings.MAX_LEN +
-            "\nPOP_SIZE=" + settings.POP_SIZE +
-            "\nDEPTH=" + settings.DEPTH +
-            "\nCROSSOVER_PROB=" + settings.CROSSOVER_PROB +
-            "\nP_MUT_PER_NODE=" + settings.P_MUT_PER_NODE +
-            "\nMIN_RANDOM=" + minRandom +
-            "\nMAX_RANDOM=" + maxRandom +
-            "\nGENERATIONS=" + settings.GENERATIONS +
-            "\nT_SIZE=" + settings.T_SIZE +
-            "\n----------------------------------\n"
-        );
+    double fitnessFunction(char[] program) {
+        int i = 0, len;
+        double result, fit = 0.0;
+
+        len = traverse(program, 0);
+        for (i = 0; i < dataFileHeader.FITNESS_CASES; i++) {
+            if (dataFileHeader.VAR_NUMBER >= 0) System.arraycopy(targets[i], 0, xAxis, 0, dataFileHeader.VAR_NUMBER);
+            TinyGP.program = program;
+            pc = 0;
+            result = run();
+            fit += Math.abs(result - targets[i][dataFileHeader.VAR_NUMBER]);
+        }
+        return (-fit);
     }
 
-    void evolve() {
-        int gen;
-        int indivs, offspring, parent1, parent2, parent;
-        double newfit;
-        char[] newind;
-        printParams();
-        stats(fitness, pop, 0);
-        for (gen = 1; gen < settings.GENERATIONS; gen++) {
-            if (fBestPop > -1e-5) {
-                System.out.print("PROBLEM SOLVED\n");
-                System.exit(0);
+    double run() { /* Interpreter */
+        char primitive = program[pc++];
+        if (primitive < settings.F_SET_START)
+            return (xAxis[primitive]);
+        switch (primitive) {
+            case Settings.ADD:
+                return (run() + run());
+            case Settings.SUB:
+                return (run() - run());
+            case Settings.MUL:
+                return (run() * run());
+            case Settings.DIV: {
+                double num = run(), den = run();
+                if (Math.abs(den) <= 0.001)
+                    return (num);
+                else
+                    return (num / den);
             }
-            for (indivs = 0; indivs < settings.POP_SIZE; indivs++) {
-                if (settings.RANDOM.nextDouble() < settings.CROSSOVER_PROB) {
-                    parent1 = tournament(fitness, settings.T_SIZE);
-                    parent2 = tournament(fitness, settings.T_SIZE);
-                    newind = crossover(pop[parent1], pop[parent2]);
-                } else {
-                    parent = tournament(fitness, settings.T_SIZE);
-                    newind = mutation(pop[parent], settings.P_MUT_PER_NODE);
-                }
-                newfit = fitnessFunction(newind);
-                offspring = negativeTournament(fitness, settings.T_SIZE);
-                pop[offspring] = newind;
-                fitness[offspring] = newfit;
-            }
-            stats(fitness, pop, gen);
         }
-        System.out.print("PROBLEM *NOT* SOLVED\n");
-        System.exit(1);
+        return (0.0); // should never get here
+    }
+
+    int negativeTournament(double[] fitness, int tsize) {
+        int worst = settings.RANDOM.nextInt(settings.POP_SIZE), i, competitor;
+        double fworst = 1e34;
+
+        for (i = 0; i < tsize; i++) {
+            competitor = settings.RANDOM.nextInt(settings.POP_SIZE);
+            if (fitness[competitor] < fworst) {
+                fworst = fitness[competitor];
+                worst = competitor;
+            }
+        }
+        return (worst);
     }
 }

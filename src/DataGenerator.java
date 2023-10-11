@@ -1,22 +1,21 @@
-import java.io.DataOutputStream;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 public class DataGenerator {
     public void generateData(
-            String fileName,
-            double start,
-            double end,
-            int quantity
+        String fileName,
+        double start,
+        double end,
+        int quantity
     ) throws IOException {
-        DataOutputStream output = new DataOutputStream(Files.newOutputStream(Paths.get(fileName)));
+        File Candidatefile = new File(fileName);
+        BufferedWriter output = new BufferedWriter(new FileWriter(Candidatefile));
         double argument = start;
         for (int i = 0; i < quantity; i++) {
-            output.writeDouble(argument);
-            output.writeBytes(" ");
-            output.writeDouble(this.function(argument));
-            output.writeBytes("\n");
+            output.write(argument + " " + this.function(argument));
+            output.newLine();
             argument = start + ((end - start) / quantity);
         }
     }

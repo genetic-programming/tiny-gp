@@ -16,7 +16,7 @@ public class Driver {
             dataFileName = args[0];
         }
 
-        dataFileName = "src/" + dataFileName;
+        dataFileName = "data/" + dataFileName;
         File dataFile = new File(dataFileName);
         if (!dataFile.exists() || dataFile.isDirectory()) {
             DataGenerator dataGenerator = new DataGenerator();
