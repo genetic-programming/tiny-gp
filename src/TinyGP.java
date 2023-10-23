@@ -2,6 +2,9 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 public class TinyGP {
@@ -17,6 +20,7 @@ public class TinyGP {
     double averageLen;
     double[][] targets;
     char[] buffer;
+    char[] bestProgram;
 
     public TinyGP(Settings settings) {
         this.settings = settings;
@@ -138,7 +142,7 @@ public class TinyGP {
         for (gen = 1; gen < settings.GENERATIONS; gen++) {
             if (fBestPop > settings.ACCEPTABLE_ERROR) {
                 System.out.print("PROBLEM SOLVED\n");
-                System.exit(0);
+                return;
             }
             for (indivs = 0; indivs < settings.POP_SIZE; indivs++) {
                 if (settings.RANDOM.nextDouble() < settings.CROSSOVER_PROBABILITY) {
@@ -180,6 +184,7 @@ public class TinyGP {
                 " Best Fitness=" + (-fBestPop) + " Avg Size=" + averageLen +
                 "\nBest Individual: ");
         printIndividual(pop[best], 0);
+        bestProgram = pop[best];
         System.out.print("\n");
         System.out.flush();
     }
@@ -369,4 +374,23 @@ public class TinyGP {
         }
         return (worst);
     }
+
+    public double[][] getTargets() {
+        return targets;
+    }
+
+    public List<Double> returnResults() {
+        List<Double> results = new ArrayList<>();
+        double result = 0.0;
+        for (int i = 0; i < dataFileHeader.FITNESS_CASES_NUMBER; i++) {
+            if (dataFileHeader.VARIABLES_NUMBER >= 0)
+                System.arraycopy(targets[i], 0, xAxis, 0, dataFileHeader.VARIABLES_NUMBER);
+            program = bestProgram;
+            pc = 0;
+            result = run();
+            results.add(result);
+        }
+        return results;
+    }
+
 }
