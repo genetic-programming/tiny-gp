@@ -21,12 +21,15 @@ public class Driver {
         dataFileName = "data/" + dataFileName;
         File dataFile = new File(dataFileName);
         DataGenerator dataGenerator = new DataGenerator();
-        String functionName = dataGenerator.generateData(dataFileName, -1000, 1000, QUANTITY, 2);
+        String functionName = dataGenerator.generateData(dataFileName, 0, 9, QUANTITY, 1);
 
         Settings settings = new Settings(dataFileName, seed);
         TinyGP gp = new TinyGP(settings);
         gp.evolve();
         CsvResultConverter.convert(gp.getTargets(), gp.returnResults(), functionName,QUANTITY);
+
+        CsvResultConverter.convertFitness(gp.getBestFitness(), gp.averageFitness, functionName);
+
         System.exit(0);
     }
 

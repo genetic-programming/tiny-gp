@@ -3,7 +3,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -21,6 +20,8 @@ public class TinyGP {
     double[][] targets;
     char[] buffer;
     char[] bestProgram;
+    List<Double> bestFitness = new ArrayList<>();
+    List<Double> averageFitness = new ArrayList<>();
 
     public TinyGP(Settings settings) {
         this.settings = settings;
@@ -180,6 +181,10 @@ public class TinyGP {
         }
         averageLen = (double) node_count / settings.POP_SIZE;
         fAvgPop /= settings.POP_SIZE;
+
+        bestFitness.add(-fBestPop);
+        averageFitness.add(-fAvgPop);
+
         System.out.print("Generation=" + gen + " Avg Fitness=" + (-fAvgPop) +
                 " Best Fitness=" + (-fBestPop) + " Avg Size=" + averageLen +
                 "\nBest Individual: ");
@@ -377,6 +382,14 @@ public class TinyGP {
 
     public double[][] getTargets() {
         return targets;
+    }
+
+    public List<Double> getBestFitness() {
+        return bestFitness;
+    }
+
+    public List<Double> getAverageFitness() {
+        return averageFitness;
     }
 
     public List<Double> returnResults() {

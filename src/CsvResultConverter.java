@@ -73,4 +73,16 @@ public class CsvResultConverter {
         }
         writer.close();
     }
+
+    public static void convertFitness(List<Double> bestFitness, List<Double> averageFitness, String functionName) throws IOException{
+
+        String fileName = functionName + ".csv";
+        BufferedWriter writer = new BufferedWriter(new FileWriter(new File("fitnessResults", fileName)));
+
+        writer.write("generation,bestFitness,averageFitness\n");
+        for(int i = 0; i < bestFitness.size(); i++){
+            writer.write(i+1 + "," + bestFitness.get(i) + "," + averageFitness.get(i) + "\n");
+        }
+        writer.close();
+    }
 }
