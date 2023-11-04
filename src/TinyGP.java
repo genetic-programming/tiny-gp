@@ -123,6 +123,8 @@ public class TinyGP {
                 case Settings.SUB:
                 case Settings.MUL:
                 case Settings.DIV:
+                case Settings.SIN:
+                case Settings.COS:
                     buffer[pos] = prim;
                     one_child = grow(buffer, pos + 1, max, depth - 1);
                     if (one_child < 0)
@@ -203,6 +205,8 @@ public class TinyGP {
             case Settings.SUB:
             case Settings.MUL:
             case Settings.DIV:
+            case Settings.SIN:
+            case Settings.COS:
                 return (traverse(buffer, traverse(buffer, ++buffercount)));
             default:
                 return (0);
@@ -213,7 +217,7 @@ public class TinyGP {
         int a1 = 0, a2;
         if (buffer[buffercounter] < settings.F_SET_START) {
             if (buffer[buffercounter] < dataFileHeader.VARIABLES_NUMBER)
-                System.out.print("X" + (buffer[buffercounter] + 1) + " ");
+                System.out.print(" X" + (buffer[buffercounter] + 1) + " ");
             else
                 System.out.print(xAxis[buffer[buffercounter]]);
             return (++buffercounter);
@@ -239,6 +243,16 @@ public class TinyGP {
                 a1 = printIndividual(buffer, ++buffercounter);
                 System.out.print(" / ");
                 break;
+            case Settings.SIN:
+                System.out.print("sin(");
+                a1 = printIndividual(buffer, ++buffercounter);
+                System.out.println(")");
+                return (a1);
+            case Settings.COS:
+                System.out.print("cos(");
+                a1 = printIndividual(buffer, ++buffercounter);
+                System.out.println(")");
+                return (a1);
         }
         a2 = printIndividual(buffer, a1);
         System.out.print(")");
@@ -320,6 +334,8 @@ public class TinyGP {
                         case Settings.SUB:
                         case Settings.MUL:
                         case Settings.DIV:
+                        case Settings.SIN:
+                        case Settings.COS:
                             parentcopy[mutsite] =
                                     (char) (settings.RANDOM.nextInt(settings.F_SET_END - settings.F_SET_START + 1)
                                             + settings.F_SET_START);
@@ -361,7 +377,11 @@ public class TinyGP {
                     return (num);
                 else
                     return (num / den);
-            }
+                }
+            case Settings.SIN:
+                return (Math.sin(run()));
+            case Settings.COS:
+                return (Math.cos(run()));
         }
         return (0.0); // should never get here
     }

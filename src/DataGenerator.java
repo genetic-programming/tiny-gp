@@ -16,13 +16,13 @@ public class DataGenerator {
         File Candidatefile = new File(fileName);
         BufferedWriter output = new BufferedWriter(new FileWriter(Candidatefile));
 
-        if(numberOfParameters == 1){
+        if (numberOfParameters == 1) {
             output.write("1 100 -5 5 " + quantity);
             output.newLine();
 
             double argument = start;
             for (int i = 0; i < quantity; i++) {
-                output.write(argument + " " + this.fun3(argument));
+                output.write(argument + " " + this.fun8(argument));
                 output.newLine();
                 argument += ((end - start) / quantity);
             }
@@ -34,7 +34,7 @@ public class DataGenerator {
             quantity = (int) Math.sqrt(quantity);
             for (int i = 0; i < quantity; i++) {
                 for (int j = 0; j < quantity; j++) {
-                    output.write(arg1 + " " + arg2 + " " + this.fun6(arg1, arg2));
+                    output.write(arg1 + " " + arg2 + " " + this.fun5(arg1, arg2));
                     output.newLine();
                     arg2 += ((end - start) / quantity);
                 }
@@ -42,8 +42,6 @@ public class DataGenerator {
                 arg2 = start;
             }
         }
-
-
 
 
         output.close();
@@ -80,6 +78,16 @@ public class DataGenerator {
     private double fun6(double x, double y) {
         this.functionName = "fun6";
         return Math.pow(x, 2) + 3 * x * y - 7 * y + 1;
+    }
+
+    private double fun7(double x) {
+        this.functionName = "fun7";
+        return Math.sin(x + 3.141592 / 2);
+    }
+
+    private double fun8(double x) {
+        this.functionName = "fun8";
+        return Math.tan(2 * x + 1);
     }
 
 }
