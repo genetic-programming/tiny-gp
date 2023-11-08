@@ -14,7 +14,8 @@ public class ExpressionOptimizer {
 
         while (matcher.find()) {
             String expression = matcher.group(1);
-            if(!(expression.contains("X1")|| expression.contains("X2")) && expression.contains(" ")) {
+            if( !(expression.contains("X1") || expression.contains("X2"))
+                    && expression.contains(" ")) {
                 Expression e = new ExpressionBuilder(expression).build();
                 double result = e.evaluate();
                 String optimizedExpression = String.valueOf(result);

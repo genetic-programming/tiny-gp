@@ -135,7 +135,7 @@ public class TinyGP {
         return (0); // should never get here
     }
 
-    void evolve() {
+    int evolve() {
         int gen;
         int indivs, offspring, parent1, parent2, parent;
         double newfit;
@@ -145,7 +145,7 @@ public class TinyGP {
         for (gen = 1; gen < settings.GENERATIONS; gen++) {
             if (fBestPop > settings.ACCEPTABLE_ERROR) {
                 System.out.print("PROBLEM SOLVED\n");
-                return;
+                return 0;
             }
             for (indivs = 0; indivs < settings.POP_SIZE; indivs++) {
                 if (settings.RANDOM.nextDouble() < settings.CROSSOVER_PROBABILITY) {
@@ -164,7 +164,7 @@ public class TinyGP {
             stats(fitness, population, gen);
         }
         System.out.print("PROBLEM *NOT* SOLVED\n");
-        System.exit(1);
+        return 1;
     }
 
     void stats(double[] fitness, char[][] pop, int gen) {

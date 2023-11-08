@@ -22,7 +22,7 @@ public class DataGenerator {
 
             double argument = start;
             for (int i = 0; i < quantity; i++) {
-                output.write(argument + " " + this.fun1(argument));
+                output.write(argument + " " + this.fun3(argument));
                 output.newLine();
                 argument += ((end - start) / quantity);
             }
@@ -34,7 +34,7 @@ public class DataGenerator {
             quantity = (int) Math.sqrt(quantity);
             for (int i = 0; i < quantity; i++) {
                 for (int j = 0; j < quantity; j++) {
-                    output.write(arg1 + " " + arg2 + " " + this.fun5(arg1, arg2));
+                    output.write(arg1 + " " + arg2 + " " + this.fun6(arg1, arg2));
                     output.newLine();
                     arg2 += ((end - start) / quantity);
                 }
