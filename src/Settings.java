@@ -19,7 +19,7 @@ public class Settings {
     public final int T_SIZE = 2;
     public final double P_MUT_PER_NODE = 0.05;
     public final double CROSSOVER_PROBABILITY = 0.9;
-    public final double ACCEPTABLE_ERROR = -10.0;
+    public final double ACCEPTABLE_ERROR = -200.0;
 
     public Settings(String fileName, long seed) {
         this.fileName = fileName;

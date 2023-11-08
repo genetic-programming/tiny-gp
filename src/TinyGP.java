@@ -190,7 +190,13 @@ public class TinyGP {
         System.out.print("Generation=" + gen + " Avg Fitness=" + (-fAvgPop) +
                 " Best Fitness=" + (-fBestPop) + " Avg Size=" + averageLen +
                 "\nBest Individual: ");
-        printIndividual(pop[best], 0);
+        StringBuffer output = new StringBuffer();
+        printIndividual(pop[best], 0, output);
+        String optimizedOutput = ExpressionOptimizer.optimizeExpression(output.toString());
+        System.out.println("\n\nOriginal: ");
+        System.out.println(output);
+        System.out.println("\nOptimized:");
+        System.out.println(optimizedOutput);
         bestProgram = pop[best];
         System.out.print("\n");
         System.out.flush();
@@ -213,49 +219,65 @@ public class TinyGP {
         }
     }
 
-    int printIndividual(char[] buffer, int buffercounter) {
+    int printIndividual(char[] buffer, int buffercounter, StringBuffer output) {
+
         int a1 = 0, a2;
         if (buffer[buffercounter] < settings.F_SET_START) {
             if (buffer[buffercounter] < dataFileHeader.VARIABLES_NUMBER)
-                System.out.print(" X" + (buffer[buffercounter] + 1) + " ");
+//                System.out.print(" X" + (buffer[buffercounter] + 1) + " ");
+                output.append(" X" + (buffer[buffercounter] + 1) + " ");
             else
-                System.out.print(xAxis[buffer[buffercounter]]);
+//                System.out.print(xAxis[buffer[buffercounter]]);
+                output.append(xAxis[buffer[buffercounter]]);
             return (++buffercounter);
         }
         switch (buffer[buffercounter]) {
             case Settings.ADD:
-                System.out.print("(");
-                a1 = printIndividual(buffer, ++buffercounter);
-                System.out.print(" + ");
+//                System.out.print("(");
+                output.append("(");
+                a1 = printIndividual(buffer, ++buffercounter, output);
+//                System.out.print(" + ");
+                output.append(" + ");
                 break;
             case Settings.SUB:
-                System.out.print("(");
-                a1 = printIndividual(buffer, ++buffercounter);
-                System.out.print(" - ");
+//                System.out.print("(");
+                output.append("(");
+                a1 = printIndividual(buffer, ++buffercounter, output);
+//                System.out.print(" - ");
+                output.append(" - ");
                 break;
             case Settings.MUL:
-                System.out.print("(");
-                a1 = printIndividual(buffer, ++buffercounter);
-                System.out.print(" * ");
+//                System.out.print("(");
+                output.append("(");
+                a1 = printIndividual(buffer, ++buffercounter, output);
+//                System.out.print(" * ");
+                output.append(" * ");
                 break;
             case Settings.DIV:
-                System.out.print("(");
-                a1 = printIndividual(buffer, ++buffercounter);
-                System.out.print(" / ");
+//                System.out.print("(");
+                output.append("(");
+                a1 = printIndividual(buffer, ++buffercounter, output);
+//                System.out.print(" / ");
+                output.append(" / ");
                 break;
             case Settings.SIN:
-                System.out.print("sin(");
-                a1 = printIndividual(buffer, ++buffercounter);
-                System.out.println(")");
+//                System.out.print("sin(");
+                output.append("sin(");
+                a1 = printIndividual(buffer, ++buffercounter, output);
+//                System.out.println(")");
+                output.append(")");
                 return (a1);
             case Settings.COS:
-                System.out.print("cos(");
-                a1 = printIndividual(buffer, ++buffercounter);
-                System.out.println(")");
+//                System.out.print("cos(");
+                output.append("cos(");
+                a1 = printIndividual(buffer, ++buffercounter, output);
+//                System.out.println(")");
+                output.append(")");
                 return (a1);
         }
-        a2 = printIndividual(buffer, a1);
-        System.out.print(")");
+        a2 = printIndividual(buffer, a1, output);
+//        System.out.print(")");
+        output.append(")");
         return (a2);
     }
 
