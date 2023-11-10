@@ -7,36 +7,33 @@ public class Driver {
 
     public static void main(String[] args) throws IOException {
 
-        double[][]  domainList = {{-10,10}, {0,100}, {-1,1}, {-1000,1000}};
-        for(int i = 0; i < 4; i++) {
-            double[] domain = domainList[i];
+        String dataFileName = "data.dat";
+        //        String dataFileName = "xmxp2.dat";
+        long seed = -1;
 
-            String dataFileName = "data.dat";
-            //        String dataFileName = "xmxp2.dat";
-            long seed = -1;
-
-            if (args.length == 2) {
-                seed = Integer.parseInt(args[0]);
-                dataFileName = args[1];
-            }
-            if (args.length == 1) {
-                dataFileName = args[0];
-            }
-
-            dataFileName = "data/" + dataFileName;
-            File dataFile = new File(dataFileName);
-            DataGenerator dataGenerator = new DataGenerator();
-            String functionName = dataGenerator.generateData(dataFileName, domain[0], domain[1], QUANTITY, 2);
-
-            Settings settings = new Settings(dataFileName, seed);
-            TinyGP gp = new TinyGP(settings);
-            int exitVal = gp.evolve();
-            CsvResultConverter.convert(gp.getTargets(), gp.returnResults(), functionName, QUANTITY);
+        if (args.length == 2) {
+            seed = Integer.parseInt(args[0]);
+            dataFileName = args[1];
         }
-//        CsvResultConverter.convertFitness(gp.getBestFitness(), gp.averageFitness, functionName);
+        if (args.length == 1) {
+            dataFileName = args[0];
+        }
 
-        System.exit(0);
+        dataFileName = "data/" + dataFileName;
+        File dataFile = new File(dataFileName);
+        DataGenerator dataGenerator = new DataGenerator();
+        String functionName = dataGenerator.generateData(dataFileName, -10, 10, QUANTITY, 2);
+
+        Settings settings = new Settings(dataFileName, seed);
+        TinyGP gp = new TinyGP(settings);
+        int exitVal = gp.evolve();
+        CsvResultConverter.convert(gp.getTargets(), gp.returnResults(), functionName, QUANTITY);
+//        CsvResultConverter.convertFitness(gp.getBestFitness(), gp.averageFitness, functionName);
+        System.exit(exitVal);
     }
+
+
+
 
 }
 
