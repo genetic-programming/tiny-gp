@@ -1,4 +1,3 @@
-import java.io.File;
 import java.io.IOException;
 
 public class Driver {
@@ -20,19 +19,17 @@ public class Driver {
         }
 
         dataFileName = "data/" + dataFileName;
-        File dataFile = new File(dataFileName);
         DataGenerator dataGenerator = new DataGenerator();
-        String functionName = dataGenerator.generateData(dataFileName, -10, 10, QUANTITY, 2);
+        String functionName = dataGenerator.generateData(dataFileName, 0, 99, QUANTITY, 1);
 
         Settings settings = new Settings(dataFileName, seed);
-        TinyGP gp = new TinyGP(settings);
+        GeneticAlgorithm gp = new GeneticAlgorithm(settings);
         int exitVal = gp.evolve();
-        CsvResultConverter.convert(gp.getTargets(), gp.returnResults(), functionName, QUANTITY);
-//        CsvResultConverter.convertFitness(gp.getBestFitness(), gp.averageFitness, functionName);
+        Statistics stats = gp.getStats();
+        CsvResultConverter.convert(gp.getTarget().getTargets(), gp.returnResults(), functionName, QUANTITY);
+        CsvResultConverter.convertFitness(stats.getBestFitness(), stats.getAverageFitness(), functionName);
         System.exit(exitVal);
     }
-
-
 
 
 }
