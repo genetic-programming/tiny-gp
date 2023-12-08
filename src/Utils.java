@@ -30,7 +30,7 @@ public class Utils {
         int a1 = 0, a2;
         if (buffer[buffercounter] < settings.F_SET_START) {
             if (buffer[buffercounter] < dataFileHeader.VARIABLES_NUMBER)
-                output.append(" X" + (buffer[buffercounter] + 1) + " ");
+                output.append(" X").append(buffer[buffercounter] + 1).append(" ");
             else
                 output.append(population.getxAxis()[buffer[buffercounter]]);
             return (++buffercounter);
@@ -93,17 +93,11 @@ public class Utils {
         if (buffer[buffercount] < settings.F_SET_START)
             return (++buffercount);
 
-        switch (buffer[buffercount]) {
-            case Settings.ADD:
-            case Settings.SUB:
-            case Settings.MUL:
-            case Settings.DIV:
-            case Settings.SIN:
-            case Settings.COS:
-                return (traverse(buffer, traverse(buffer, ++buffercount)));
-            default:
-                return (0);
-        }
+        return switch (buffer[buffercount]) {
+            case Settings.ADD, Settings.SUB, Settings.MUL, Settings.DIV, Settings.SIN, Settings.COS ->
+                    (traverse(buffer, traverse(buffer, ++buffercount)));
+            default -> (0);
+        };
     }
 
 

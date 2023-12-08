@@ -49,7 +49,7 @@ public class GeneticAlgorithm {
                 population[offspring] = newind;
                 fitness[offspring] = newfit;
             }
-            stats.calculateStats(fitness, population, gen);
+            fBestPop = stats.calculateStats(fitness, population, gen);
         }
         System.out.print("PROBLEM *NOT* SOLVED\n");
         return 1;
